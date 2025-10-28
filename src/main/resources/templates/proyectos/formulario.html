@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulario Proyecto</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/proyectos}">Proyectos</a>
+            <a class="navbar-brand" th:href="@{/empleados}">Empleados</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4" th:text="${proyecto.id == null ? 'Nuevo Proyecto' : 'Editar Proyecto'}"></h1>
+                <form th:action="@{/proyectos/guardar}" th:object="${proyecto}" method="post">
+                    <input type="hidden" th:field="*{id}" th:if="${proyecto.id != null}" />
+                    <div class="mb-3">
+                        <label class="form-label">Nombre:</label>
+                        <input type="text" th:field="*{nombre}" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción:</label>
+                        <input type="text" th:field="*{descripcion}" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Empleado:</label>
+                        <select th:field="*{empleadoId}" class="form-select" required>
+                            <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 mb-3">Guardar</button>
+                </form>
+
+                <h3 class="mt-4">Tareas</h3>
+                <table class="table table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tarea, iterStat : ${proyecto.tareas}">
+                            <td>
+                                <form th:action="@{/proyectos/{id}/tarea/editar(id=${proyecto.id})}" method="post" class="d-flex gap-2">
+                                    <input type="text" name="descripcion" th:value="${tarea.descripcion}" th:disabled="${tarea.estado == 'Completado'}" class="form-control" required />
+                                    <select name="estado" th:disabled="${tarea.estado == 'Completado'}" class="form-select">
+                                        <option th:selected="${tarea.estado == 'Sin iniciar'}" value="Sin iniciar">Sin iniciar</option>
+                                        <option th:selected="${tarea.estado == 'Completado'}" value="Completado">Completado</option>
+                                    </select>
+                                    <input type="hidden" name="tareaIndex" th:value="${iterStat.index}" />
+                                    <button type="submit" class="btn btn-primary" th:disabled="${tarea.estado == 'Completado'}">Actualizar</button>
+                                </form>
+                            </td>
+                            <td>
+                                <span th:text="${tarea.estado}"></span>
+                            </td>
+                            <td>
+                                <form th:action="@{/proyectos/{id}/tarea/eliminar(id=${proyecto.id})}" method="post" class="d-inline">
+                                    <input type="hidden" name="tareaIndex" th:value="${iterStat.index}" />
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            </td>         
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${proyecto.id != null}">
+                    <form th:action="@{/proyectos/{id}/tarea/agregar(id=${proyecto.id})}" method="post" class="d-flex gap-2 mb-3">
+                        <input type="text" name="descripcion" placeholder="Nueva tarea" class="form-control" required />
+                        <button type="submit" class="btn btn-success">Agregar tarea</button>
+                    </form>
+                </div>
+                <div th:if="${proyecto.id == null}" class="alert alert-info">
+                    Guarda el proyecto antes de agregar tareas.
+                </div>
+                <a class="btn btn-link w-100" th:href="@{/proyectos}">Volver a la lista</a>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS (opcional, solo si usas componentes JS de Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
